@@ -70,8 +70,13 @@ The model is trained using binary cross-entropy loss with class weighting to han
 
 Model performance is evaluated on a validation dataset using several metrics including **accuracy, ROC-AUC, and F1-score**.
 
-HERE
+#### Evaluation Results 
 
+![Evaluation Result 1](https://raw.githubusercontent.com/Laman2005/CSCI-4701-Deep-Learning_Course_Project/main/Screenshot%202026-03-14%20113918.png)
+
+![Evaluation Result 2](https://raw.githubusercontent.com/Laman2005/CSCI-4701-Deep-Learning_Course_Project/main/Screenshot%202026-03-14%20114409.png)
+
+![Evaluation Result 3](https://raw.githubusercontent.com/Laman2005/CSCI-4701-Deep-Learning_Course_Project/main/Screenshot%202026-03-14%20114454.png) 
 ---
 
 # Model Interpretability
