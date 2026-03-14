@@ -70,6 +70,8 @@ The model is trained using binary cross-entropy loss with class weighting to han
 
 Model performance is evaluated on a validation dataset using several metrics including **accuracy, ROC-AUC, and F1-score**.
 
+HERE
+
 ---
 
 # Model Interpretability
@@ -81,8 +83,6 @@ The project uses **Grad-CAM (Gradient-weighted Class Activation Mapping)** to ge
 These heatmaps are overlaid on the original images to produce **focus maps**, which allow us to verify whether the model is focusing on clinically relevant areas such as the **cardiac region**.
 
 This helps ensure that the model is learning meaningful patterns rather than relying on unrelated image artifacts.
-
-
 
 ---
 
