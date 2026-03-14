@@ -83,7 +83,7 @@ Model performance is evaluated on a validation dataset using several metrics inc
 
 In medical applications it is important to understand **why the model makes certain predictions**. For this reason, interpretability methods were applied to visualize which parts of the image influence the model’s decision.
 
-The project uses **Grad-CAM (Gradient-weighted Class Activation Mapping)** to generate heatmaps that highlight regions of the X-ray image that contribute most to the prediction.
+The project generates heatmaps that highlight regions of the X-ray image that contribute most to the prediction.
 
 These heatmaps are overlaid on the original images to produce **focus maps**, which allow us to verify whether the model is focusing on clinically relevant areas such as the **cardiac region**.
 
