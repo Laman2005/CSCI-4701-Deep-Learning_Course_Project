@@ -108,15 +108,21 @@ These results show that the model is able to detect cardiomegaly reasonably well
 
 # Results Analysis
 
-Several observations can be made from the experimental results.
+Several observations can be made from the results of the cardiomegaly detection model during training and evaluation.
 
-First, the model achieves moderate predictive performance. The ROC-AUC score indicates that the model is able to distinguish positive and negative cardiomegaly cases better than random guessing, but the classification task remains challenging.
+First, the model shows moderate performance on the validation dataset. The ROC-AUC score indicates that the model can distinguish between cardiomegaly and non-cardiomegaly cases better than random guessing. This means the model has learned some useful patterns from the chest X-ray images. However, the performance is still not very high, which shows that detecting cardiomegaly from X-rays is a difficult task. The differences between a normal heart and an enlarged heart can sometimes be very small, and factors like patient position, image quality, and anatomical differences can also affect the images.
 
-Second, the dataset shows some class imbalance, which may affect the F1-score and prediction stability. Handling uncertainty labels and limited training samples may also influence performance.
+Another important factor is the class imbalance in the dataset. There are fewer cardiomegaly cases compared to normal cases, which may cause the model to predict the majority class more often. Although class weighting was used to reduce this issue, the imbalance may still affect the F1-score and lead to some incorrect predictions. In addition, the CheXpert dataset includes uncertain labels that were treated as negative in this project. While this makes the training process easier, it may also introduce some noise into the labels and reduce the overall accuracy of the model.
 
-Third, the fairness analysis shows only small differences between male and female patients. While performance is relatively similar across both groups, further experiments with larger samples would be needed to confirm whether any bias exists.
+The fairness analysis across patient sex shows that the model performs similarly for male and female patients. The differences in accuracy and ROC-AUC scores are small, which suggests that the model does not strongly favor one group over the other. However, these results should still be interpreted carefully because differences in sample size or other factors like age and imaging view might influence the results. More analysis with larger datasets would help better evaluate fairness.
 
-Finally, Grad-CAM visualizations indicate that the model often focuses on the **region surrounding the heart**, which suggests that the network is learning relevant visual features rather than unrelated artifacts.
+The Grad-CAM visualization also helps us understand how the model makes its predictions. In many cases, the highlighted areas are close to the cardiac silhouette, which is the region that radiologists usually focus on when checking for cardiomegaly. This suggests that the model is learning meaningful features from the images. However, in some cases the highlighted regions extend outside the heart area, which may indicate that the model is sometimes influenced by other parts of the image.
+
+Some methods used in this project worked well. Transfer learning with a pretrained convolutional neural network helped the model learn useful features more quickly than training from scratch. Data augmentation techniques such as cropping, flipping, and rotation also helped improve the model’s ability to generalize by creating variations of the training images.
+
+However, there are also some limitations. The dataset used in the experiment was smaller due to computational limitations, which may limit the model’s ability to learn stronger patterns. In addition, the task was simplified to a binary classification problem, even though chest X-rays can contain multiple medical conditions at the same time.
+
+Overall, the results show that the model is able to learn useful information from chest X-ray images and make reasonable predictions about cardiomegaly. At the same time, challenges such as class imbalance, uncertain labels, and limited data still affect the model’s performance. Future improvements such as better tuning and using more data could help improve the model further.
 
 ---
 
