@@ -56,8 +56,6 @@ The baseline model converged steadily over 5 epochs:
 
 The weighted model shows higher absolute loss values because the positive class is penalized more heavily, which is expected and not a sign of poor training. Both models show a downward trend, indicating stable learning.
 
-<img width="650" height="278" alt="15 Cases Prediction" src="https://github.com/user-attachments/assets/4aa30ad6-085b-4a5f-a80e-cc2ec9d170c8" />
-
 ### Performance Metrics
 
 | Metric   | Baseline | Weighted Loss |
@@ -66,7 +64,12 @@ The weighted model shows higher absolute loss values because the positive class 
 | AUC      | 0.639    | 0.691         |
 | F1 Score | 0.029    | 0.323         |
 
+<img width="259" height="193" alt="ROC by Gender" src="https://github.com/user-attachments/assets/ac6cd324-d3fc-42f2-a051-1fb0cda17905" />
+
 The most striking difference is in F1 score. The baseline model achieves nearly zero F1 (0.029), which reveals that despite its decent accuracy, it is essentially predicting the majority class (no Cardiomegaly) almost all the time. The weighted loss model dramatically improves this to 0.323, meaning the model begins to actually detect positive cases at a meaningful rate. AUC also improves from 0.639 to 0.691, which is a moderate but real improvement in the model's ability to discriminate between classes. The accuracy improvement (0.714 → 0.731) is smaller because accuracy is dominated by the majority class anyway.
+
+<img width="662" height="211" alt="Comparisons" src="https://github.com/user-attachments/assets/0d017fce-3524-42b7-9e43-73e7c9916cd7" />
+
 
 These results together confirm that the baseline model is heavily biased toward predicting "no Cardiomegaly" — it looks accurate because most patients don't have it. The weighted loss model makes a real tradeoff: it sacrifices some precision on negatives to gain meaningful recall on positives.
 
@@ -82,7 +85,15 @@ The baseline model shows a very small accuracy gap between male and female patie
 
 When we switch to the weighted loss model, something interesting happens: female accuracy improves significantly (0.717 → 0.755) while male accuracy stays the same (0.711). This widens the fairness gap from 0.006 to 0.044. This is not a trivial result. It suggests that the model, when given incentive to detect positive cases, does so more effectively for female patients than male patients. One possible explanation is that the CheXpert dataset has a different distribution of Cardiomegaly severity or image characteristics across gender groups, meaning the model latches onto features that work better for one group. This is exactly the kind of bias that fairness analysis in medical AI is meant to surface.
 
+<img width="192" height="194" alt="Confusion Matrix" src="https://github.com/user-attachments/assets/65b103d1-d3cb-419a-a7c9-5f6a6c9273e7" />
+
+<img width="361" height="222" alt="Training Loss" src="https://github.com/user-attachments/assets/496448e3-2aaf-4cc8-882c-7bf69a491200" />
+
+<img width="298" height="185" alt="Probability Distribution" src="https://github.com/user-attachments/assets/b5ca25f3-b8ea-42b0-a21d-6509fb77eb16" />
+
 ### Image-Level Analysis (15 Cases)
+
+<img width="650" height="278" alt="15 Cases Prediction" src="https://github.com/user-attachments/assets/4aa30ad6-085b-4a5f-a80e-cc2ec9d170c8" />
 
 We ran qualitative prediction analysis on 15 selected validation cases (confident correct, confident wrong, and fairness-sampled cases). The results showed:
 
