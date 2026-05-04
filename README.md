@@ -87,7 +87,11 @@ When we switch to the weighted loss model, something interesting happens: female
 
 <img width="192" height="194" alt="Confusion Matrix" src="https://github.com/user-attachments/assets/65b103d1-d3cb-419a-a7c9-5f6a6c9273e7" />
 
+---
+
 <img width="361" height="222" alt="Training Loss" src="https://github.com/user-attachments/assets/496448e3-2aaf-4cc8-882c-7bf69a491200" />
+
+---
 
 <img width="298" height="185" alt="Probability Distribution" src="https://github.com/user-attachments/assets/b5ca25f3-b8ea-42b0-a21d-6509fb77eb16" />
 
