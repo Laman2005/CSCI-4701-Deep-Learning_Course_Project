@@ -1,222 +1,182 @@
-# Cardiomegaly Detection from Chest X-Ray Images using Deep Learning
+# Fairness-Aware Cardiomegaly Detection from Chest X-Rays Using EfficientNet-B0
+### CSCI 4701: Deep Learning — Spring 2026 | Project Milestone 2
+**Team Project** - **FocusGame**
 
-**Course:** CSCI-4701 Deep Learning Course_Project
-**Semester:** Spring 2026
-
----
-
-# Project Goal
-
-The goal of this project is to develop a deep learning system that can automatically detect **cardiomegaly (enlarged heart)** from chest X-ray images. Cardiomegaly is an important clinical indicator associated with several cardiovascular diseases. Detecting it accurately from radiographic images can help support medical diagnosis and assist clinicians in identifying potential heart conditions.
-
-The project aims to build a **complete machine learning pipeline using PyTorch** that loads medical imaging data, preprocesses the images, trains a convolutional neural network, and evaluates the model’s predictive performance. In addition to measuring standard performance metrics, the project also analyzes whether the model behaves differently for **male and female patients**, which helps identify potential biases in the dataset or the trained model.
+*Laman Panakhova BSCS 2026*
 
 ---
 
-# Problem Description
+## Project Goal
 
-Chest X-ray interpretation is a challenging task that requires expert knowledge from radiologists. With the increasing availability of medical imaging datasets, deep learning models have shown strong potential for assisting with automated image analysis.
+The central question of this project is: **Does a deep learning model trained on chest X-ray images to detect Cardiomegaly perform equally well across male and female patients, and can modifying the training loss function reduce any observed performance gap?**
 
-However, building reliable medical AI systems involves several challenges:
-
-* Medical datasets often contain **label uncertainty**
-* Class distributions may be **imbalanced**
-* Models may learn **spurious correlations**
-* Predictions must remain **interpretable and trustworthy**
-
-This project focuses on addressing these challenges by building a robust training pipeline and analyzing both **model performance and interpretability**.
+Cardiomegaly (enlargement of the heart) is a clinically significant condition detectable from chest X-rays. We trained an EfficientNet-B0 model on the CheXpert dataset and studied whether the model's predictions are biased with respect to patient sex. We then compared a standard (baseline) training setup against a weighted loss variant designed to address class imbalance, and examined whether this change also affects fairness across gender groups.
 
 ---
 
-# Dataset
+## Dataset
 
-This project uses the **CheXpert-v1.0-small dataset**, which is a subset of the CheXpert dataset released by Stanford. The dataset used in this project is accessed through Kaggle and is available at: https://www.kaggle.com/datasets/ashery/chexpert 
+We used the **CheXpert** dataset (Stanford Medicine), a large public chest X-ray dataset with radiologist-labeled findings including Cardiomegaly, as well as patient demographic metadata including sex.
 
-The dataset contains chest X-ray images together with labels extracted automatically from radiology reports. Each record includes:
+- Training subset: **12,000 samples** (sampled for computational feasibility)
+- Validation set: Full validation split
+- Label strategy: Uncertain labels (`-1`) were mapped to `0` (negative) following common practice
+- Dataset link: https://www.kaggle.com/datasets/ashery/chexpert
 
-* X-ray image
-* Patient age
-* Patient sex
-* Image view
-* Diagnostic labels for multiple thoracic conditions
-
-For this project, the task is simplified to **binary classification**, where the model predicts whether **cardiomegaly is present or not**.
-
-Some labels in the dataset are marked as **uncertain (-1)**. In this project these uncertain labels are treated as negative cases to simplify training.
+The dataset contains a natural class imbalance, negative cases (no Cardiomegaly) significantly outnumber positive cases, which is a key challenge we addressed in our experiments.
 
 ---
 
-# Approach
+## Approach
 
-The system is implemented in **PyTorch** and follows a modular machine learning pipeline.
+We fine-tuned a pre-trained **EfficientNet-B0** (ImageNet weights) for binary classification of Cardiomegaly. The feature extractor layers were frozen; only the classifier head was trained, consisting of a Dropout layer (p=0.3) followed by a fully connected output layer. We used AdamW optimizer with a learning rate of 2e-4 and mixed-precision training (AMP) for efficiency.
 
-### 1. Data Loading
+Two experiments were run:
 
-A custom PyTorch dataset class loads X-ray images, labels, and metadata from the dataset CSV files.
+1. **Baseline**: Standard `BCEWithLogitsLoss` without class weighting
+2. **Weighted Loss**: `BCEWithLogitsLoss` with `pos_weight=3.0` to penalize false negatives more heavily and counter class imbalance
 
-### 2. Data Preprocessing
-
-Images are resized and normalized before being passed to the neural network. Data augmentation techniques such as random cropping, flipping, and rotation are applied during training to improve model generalization.
-
-### 3. Model Architecture
-
-A pretrained convolutional neural network (**EfficientNet-B4**) is used through transfer learning. The final classification layer is replaced with a single output neuron for binary classification.
-
-### 4. Training
-
-The model is trained using binary cross-entropy loss with class weighting to handle class imbalance. The **AdamW optimizer** is used for training, and learning rate scheduling is applied to stabilize optimization.
-
-### 5. Evaluation
-
-Model performance is evaluated on a validation dataset using several metrics including **accuracy, ROC-AUC, and F1-score**.
-
-#### Evaluation Results 
-
-![Evaluation Result 1](https://raw.githubusercontent.com/Laman2005/CSCI-4701-Deep-Learning_Course_Project/main/Screenshot%202026-03-14%20113918.png)
-
-![Evaluation Result 2](https://raw.githubusercontent.com/Laman2005/CSCI-4701-Deep-Learning_Course_Project/main/Screenshot%202026-03-14%20114409.png)
-
-![Evaluation Result 3](https://raw.githubusercontent.com/Laman2005/CSCI-4701-Deep-Learning_Course_Project/main/Screenshot%202026-03-14%20114454.png) 
----
-
-# Model Interpretability
-
-In medical applications it is important to understand **why the model makes certain predictions**. For this reason, interpretability methods were applied to visualize which parts of the image influence the model’s decision.
-
-The project generates heatmaps that highlight regions of the X-ray image that contribute most to the prediction.
-
-These heatmaps are overlaid on the original images to produce **focus maps**, which allow us to verify whether the model is focusing on clinically relevant areas such as the **cardiac region**.
-
-This helps ensure that the model is learning meaningful patterns rather than relying on unrelated image artifacts.
+Both models were trained for 5 epochs on 12,000 training samples and evaluated on the full validation set.
 
 ---
 
+## Experimental Results
 
-# Experimental Results
+### Training Loss
 
-The trained model achieved the following results on the validation dataset:
+The baseline model converged steadily over 5 epochs:
 
-| Group   | Accuracy | ROC-AUC | F1 Score |
-| ------- | -------- | ------- | -------- |
-| Overall | 0.782    | 0.690   | 0.549    |
-| Male    | 0.789    | 0.667   | 0.557    |
-| Female  | 0.774    | 0.706   | 0.538    |
+| Epoch | Baseline Loss | Weighted Loss |
+|-------|--------------|---------------|
+| 1     | 0.3801       | 0.7376        |
+| 2     | 0.3662       | 0.7274        |
+| 3     | 0.3662       | 0.7214        |
+| 4     | 0.3621       | 0.7247        |
+| 5     | 0.3635       | 0.7175        |
 
-These results show that the model is able to detect cardiomegaly reasonably well, although there is still room for improvement.
+The weighted model shows higher absolute loss values because the positive class is penalized more heavily, which is expected and not a sign of poor training. Both models show a downward trend, indicating stable learning.
+
+### Performance Metrics
+
+| Metric   | Baseline | Weighted Loss |
+|----------|----------|---------------|
+| Accuracy | 0.714    | 0.731         |
+| AUC      | 0.639    | 0.691         |
+| F1 Score | 0.029    | 0.323         |
+
+The most striking difference is in F1 score. The baseline model achieves nearly zero F1 (0.029), which reveals that despite its decent accuracy, it is essentially predicting the majority class (no Cardiomegaly) almost all the time. The weighted loss model dramatically improves this to 0.323, meaning the model begins to actually detect positive cases at a meaningful rate. AUC also improves from 0.639 to 0.691, which is a moderate but real improvement in the model's ability to discriminate between classes. The accuracy improvement (0.714 → 0.731) is smaller because accuracy is dominated by the majority class anyway.
+
+These results together confirm that the baseline model is heavily biased toward predicting "no Cardiomegaly" — it looks accurate because most patients don't have it. The weighted loss model makes a real tradeoff: it sacrifices some precision on negatives to gain meaningful recall on positives.
+
+### Fairness Analysis
+
+| Metric      | Baseline Male | Baseline Female | Weighted Male | Weighted Female |
+|-------------|--------------|-----------------|---------------|-----------------|
+| Accuracy    | 0.711        | 0.717           | 0.711         | 0.755           |
+| AUC         | 0.609        | 0.640           | —             | —               |
+| Gap (Acc)   | 0.006        | —               | 0.044         | —               |
+
+The baseline model shows a very small accuracy gap between male and female patients (0.006), which initially looks fair. However, this apparent fairness is largely an artifact of the model predicting negative for almost everyone, both groups are "equally ignored." Once we look at AUC per group, there is already a difference: female AUC (0.640) is slightly higher than male AUC (0.609), suggesting the model finds female X-rays slightly easier to classify even in the baseline.
+
+When we switch to the weighted loss model, something interesting happens: female accuracy improves significantly (0.717 → 0.755) while male accuracy stays the same (0.711). This widens the fairness gap from 0.006 to 0.044. This is not a trivial result. It suggests that the model, when given incentive to detect positive cases, does so more effectively for female patients than male patients. One possible explanation is that the CheXpert dataset has a different distribution of Cardiomegaly severity or image characteristics across gender groups, meaning the model latches onto features that work better for one group. This is exactly the kind of bias that fairness analysis in medical AI is meant to surface.
+
+### Image-Level Analysis (15 Cases)
+
+We ran qualitative prediction analysis on 15 selected validation cases (confident correct, confident wrong, and fairness-sampled cases). The results showed:
+
+- Most predictions in the baseline model fell into the "correct but low confidence" category — the model was predicting negative with low certainty, which happened to be correct due to the base rate of the negative class.
+- Error cases were uniformly in the "wrong and low confidence" category, meaning the model was uncertain and guessed wrong. There were no cases of high-confidence wrong predictions, which is reassuring from a safety standpoint. Overconfident incorrect predictions (high P, wrong label) are the most dangerous type in clinical settings and were not observed.
+- Gender-sampled cases showed no visually obvious pattern in the images themselves; errors were distributed across both groups, though the fairness metrics confirm a quantitative difference.
+
+This visual inspection supports the interpretation from the metrics: the model is not confidently making wrong calls, but it is too conservative, it under-predicts Cardiomegaly broadly, not in a visually obvious pattern tied to patient appearance.
 
 ---
 
-# Results Analysis
+## Interpretation and Conclusions
 
-Several observations can be made from the results of the cardiomegaly detection model during training and evaluation.
+**What did we find?**
 
-First, the model shows moderate performance on the validation dataset. The ROC-AUC score indicates that the model can distinguish between cardiomegaly and non-cardiomegaly cases better than random guessing. This means the model has learned some useful patterns from the chest X-ray images. However, the performance is still not very high, which shows that detecting cardiomegaly from X-rays is a difficult task. The differences between a normal heart and an enlarged heart can sometimes be very small, and factors like patient position, image quality, and anatomical differences can also affect the images.
+The baseline EfficientNet-B0 model trained without class weighting learns to exploit the class imbalance, it achieves 71% accuracy by predominantly predicting the negative class, as confirmed by the near-zero F1 score. This is a well-known failure mode in imbalanced medical classification. The model technically "works" on paper if you only look at accuracy, but it provides no clinical value because it rarely detects the disease.
 
-Another important factor is the class imbalance in the dataset. There are fewer cardiomegaly cases compared to normal cases, which may cause the model to predict the majority class more often. Although class weighting was used to reduce this issue, the imbalance may still affect the F1-score and lead to some incorrect predictions. In addition, the CheXpert dataset includes uncertain labels that were treated as negative in this project. While this makes the training process easier, it may also introduce some noise into the labels and reduce the overall accuracy of the model.
+Introducing a pos_weight of 3.0 in the loss function partially corrects this. F1 jumps from 0.029 to 0.323, and AUC improves from 0.639 to 0.691. These are meaningful improvements, not just numerical noise. The weighted model actually attempts to identify positive cases, which is the clinical objective.
 
-The fairness analysis across patient sex shows that the model performs similarly for male and female patients. The differences in accuracy and ROC-AUC scores are small, which suggests that the model does not strongly favor one group over the other. However, these results should still be interpreted carefully because differences in sample size or other factors like age and imaging view might influence the results. More analysis with larger datasets would help better evaluate fairness.
+**What does this mean for fairness?**
 
-The Grad-CAM visualization also helps us understand how the model makes its predictions. In many cases, the highlighted areas are close to the cardiac silhouette, which is the region that radiologists usually focus on when checking for cardiomegaly. This suggests that the model is learning meaningful features from the images. However, in some cases the highlighted regions extend outside the heart area, which may indicate that the model is sometimes influenced by other parts of the image.
+Our results show a nuanced fairness story. The baseline model appears superficially fair (small gender gap) but only because it fails equally for both groups. The weighted model becomes more effective but introduces a wider gender gap, performing better on female patients. This pattern suggests that class-imbalance corrections do not automatically produce fair models, they can shift which group benefits more from the improvement. Simply balancing the loss function is not sufficient for equitable performance across demographic groups.
 
-Some methods used in this project worked well. Transfer learning with a pretrained convolutional neural network helped the model learn useful features more quickly than training from scratch. Data augmentation techniques such as cropping, flipping, and rotation also helped improve the model’s ability to generalize by creating variations of the training images.
+**Is the model good enough for clinical use?**
 
-However, there are also some limitations. The dataset used in the experiment was smaller due to computational limitations, which may limit the model’s ability to learn stronger patterns. In addition, the task was simplified to a binary classification problem, even though chest X-rays can contain multiple medical conditions at the same time.
-
-Overall, the results show that the model is able to learn useful information from chest X-ray images and make reasonable predictions about cardiomegaly. At the same time, challenges such as class imbalance, uncertain labels, and limited data still affect the model’s performance. Future improvements such as better tuning and using more data could help improve the model further.
+No — and we are not claiming otherwise. An AUC of 0.691 and an F1 of 0.323 represent a model that has learned some real signal from the data but is far from clinical-grade performance. This project's value is not in achieving deployment-ready accuracy, but in demonstrating: (a) how standard training fails silently due to class imbalance, (b) how fairness metrics reveal disparities that accuracy hides, and (c) how a simple intervention (weighted loss) improves one problem while potentially introducing another.
 
 ---
 
-# Milestone 2 Improvements
+## Limitations and What Did Not Work
 
-For Milestone 2, the model will be further improved through several steps:
+**Class imbalance handling was only partially successful.** A pos_weight of 3.0 was chosen heuristically. A more principled approach would compute the actual positive-to-negative ratio in the training split and use that directly, or explore alternative strategies like oversampling or focal loss.
 
-* Fine-tuning additional layers of the pretrained network
-* Improving **accuracy, ROC-AUC, and F1-score**
-* Performing **hyperparameter tuning**
-* Conducting deeper **error analysis**
-* Expanding fairness analysis across more patient attributes
+**Uncertain labels were treated as negatives.** CheXpert contains a large number of uncertain (`-1`) labels for Cardiomegaly. We converted these to 0, which is one common convention, but it likely underestimates the true positive rate and introduces label noise. A proper treatment would be to either exclude these samples or use a label-smoothing approach.
 
-These improvements aim to produce a more reliable and better-performing model.
+**Training was limited to 12,000 samples and 5 epochs.** This was a direct consequence of computational constraints, training on Google Colab with a T4 GPU meant that each epoch took approximately 97 seconds. Using the full CheXpert training set (~200,000 images) was not feasible within our compute budget. It is likely that more data and more training would substantially improve results, and the fairness gap might change as well. Further research with access to full training data and longer fine-tuning would be needed to draw stronger conclusions.
+
+**No hyperparameter search was conducted.** The learning rate (2e-4), dropout rate (0.3), and pos_weight (3.0) were fixed values. A more complete study would sweep these and report results on a held-out test set — using the validation set for both model selection and reporting introduces optimism bias.
+
+**GradCAM was not fully implemented.** We implemented a basic visual check module (`gradcam.py`) but did not complete a full Grad-CAM analysis to see which regions of the X-ray the model attends to. This would have been valuable to check whether the model is using clinically relevant features (e.g., cardiac silhouette size) or spurious correlations (e.g., patient positioning, medical devices visible in the image). This remains an important direction for future work.
+
+**Fairness analysis is limited to binary sex.** The CheXpert metadata only includes male/female sex labels. A more complete fairness study would also examine age groups, race/ethnicity (if available), and intersectional subgroups. Future work could incorporate datasets with richer demographic metadata.
 
 ---
 
-# Repository Structure
+## Repository Structure
 
 ```
 .
-├── notebook/
-│   └── cardiomegaly_pipeline.ipynb
 ├── src/
-│   ├── dataset.py
-│   ├── model.py
-│   ├── train.py
-│   └── evaluation.py
-├── results/
+│   ├── dataset.py          # CheXpertDataset class
+│   ├── model.py            # EfficientNet-B0 with frozen backbone
+│   ├── train.py            # Training loop with AMP
+│   ├── evaluate.py         # Evaluation with metrics
+│   ├── fairness.py         # Per-group accuracy and AUC
+│   ├── experiments.py      # Run and compare experiments
+│   ├── visualization.py    # Basic plots
+│   ├── visualization_full.py # Extended visualization suite
+│   ├── calibration.py      # Calibration curve
+│   ├── image_analysis.py   # Prediction case viewer
+│   ├── image_analysis___.py # Case viewer with interpretation
+│   ├── gradcam.py          # Simple visual check
+│   └── utils.py            # Save metrics to JSON
+├── CSCI4701_20295_Spring2026_FinalProject_FocusGame.ipynb        # Main graded notebook
 └── README.md
 ```
 
-The repository is organized so that the core functionality is implemented as **modular Python code**, while the main notebook imports these modules to run the full experiment.
-
 ---
 
-# How to Install Dependencies
+## How to Reproduce (Google Colab)
 
-The project can be run using **Google Colab**.
+```python
+# 1. Clone the repository
+!git clone <your-repo-url>
+%cd <repo-folder>
 
-Required Python libraries include:
+# 2. Install dependencies
+!pip install kagglehub torch torchvision scikit-learn pandas matplotlib seaborn tqdm -q
 
-* PyTorch
-* torchvision
-* pandas
-* numpy
-* matplotlib
-* scikit-learn
-* kagglehub
-
-Dependencies can be installed using pip:
-
-```
-pip install torch torchvision pandas numpy matplotlib scikit-learn kagglehub
+# 3. Run the notebook
+# Open CSCI4701_20295_Spring2026_FinalProject_FocusGame.ipynb and run all cells top to bottom
+# The notebook downloads the CheXpert dataset automatically via kagglehub
+# GPU runtime recommended (Runtime > Change runtime type > T4 GPU)
 ```
 
 ---
 
-# Running the Project
+## Team Contributions
 
-1. Open the main notebook in **Google Colab**
-2. Run all cells from top to bottom
-3. The notebook will automatically:
+| Member | Contributions |
+|--------|--------------|
+| [Laman Panakhova] | Dataset pipeline, model architecture, training loop; Fairness analysis, visualization suite, experiments framework; Image analysis, calibration, results interpretation, README
 
-   * Download the dataset
-   * Train the model
-   * Evaluate performance
-   * Generate visualizations and results
-
-Running the notebook end-to-end reproduces all reported results.
 
 ---
 
-# Team Member Contributions
+## Summary
 
-| Team Member     | Contribution                                                                                             |
-| --------------- | -------------------------------------------------------------------------------------------------------- |
-| Laman Panakhova | Data preprocessing, dataset implementation, model training pipeline, visualizations, experiment analysis |
-
----
-
-# Technologies Used
-
-* Python
-* PyTorch
-* Torchvision
-* NumPy
-* Pandas
-* Matplotlib
-* Scikit-learn
-* KaggleHub
-
----
-
-# Reproducibility
-
-The repository includes a single **main Jupyter notebook** that runs end-to-end on Google Colab. The notebook imports modular Python code from the repository and reproduces all reported experimental results.
+This project investigated whether a standard EfficientNet-B0 fine-tuned on CheXpert exhibits gender-based performance disparities in Cardiomegaly detection, and whether weighted loss training addresses these disparities. We found that the baseline model fails silently due to class imbalance (F1 ≈ 0), that weighted loss meaningfully improves positive class detection (F1 = 0.323, AUC = 0.691), and that this improvement is unevenly distributed across gender groups — female patients benefit more than male patients, widening the accuracy gap from 0.006 to 0.044. These findings illustrate that fairness in medical AI cannot be assumed from aggregate metrics alone, and that common fixes for class imbalance do not automatically produce equitable outcomes. Further work with more data, broader hyperparameter search, and richer demographic labels would be needed to draw conclusive claims.
