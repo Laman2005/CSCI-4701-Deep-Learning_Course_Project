@@ -1,5 +1,5 @@
 # Fairness-Aware Cardiomegaly Detection from Chest X-Rays Using EfficientNet-B0
-### CSCI 4701: Deep Learning — Spring 2026 | Project Milestone 2
+### CSCI 4701: Deep Learning — Spring 2026 | Project Milestone 1 | Project Milestone 2
 **Team Project** - **FocusGame**
 
 *Laman Panakhova BSCS 2026*
