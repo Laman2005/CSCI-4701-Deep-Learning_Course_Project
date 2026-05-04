@@ -56,6 +56,8 @@ The baseline model converged steadily over 5 epochs:
 
 The weighted model shows higher absolute loss values because the positive class is penalized more heavily, which is expected and not a sign of poor training. Both models show a downward trend, indicating stable learning.
 
+<img width="650" height="278" alt="15 Cases Prediction" src="https://github.com/user-attachments/assets/4aa30ad6-085b-4a5f-a80e-cc2ec9d170c8" />
+
 ### Performance Metrics
 
 | Metric   | Baseline | Weighted Loss |
