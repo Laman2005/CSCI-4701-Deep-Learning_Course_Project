@@ -101,7 +101,7 @@ When we switch to the weighted loss model, something interesting happens: female
 
 We ran qualitative prediction analysis on 15 selected validation cases (confident correct, confident wrong, and fairness-sampled cases). The results showed:
 
-- Most predictions in the baseline model fell into the "correct but low confidence" category — the model was predicting negative with low certainty, which happened to be correct due to the base rate of the negative class.
+- Most predictions in the baseline model fell into the "correct but low confidence" category, the model was predicting negative with low certainty, which happened to be correct due to the base rate of the negative class.
 - Error cases were uniformly in the "wrong and low confidence" category, meaning the model was uncertain and guessed wrong. There were no cases of high-confidence wrong predictions, which is reassuring from a safety standpoint. Overconfident incorrect predictions (high P, wrong label) are the most dangerous type in clinical settings and were not observed.
 - Gender-sampled cases showed no visually obvious pattern in the images themselves; errors were distributed across both groups, though the fairness metrics confirm a quantitative difference.
 
