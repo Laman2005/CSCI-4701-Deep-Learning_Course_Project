@@ -71,7 +71,7 @@ The most striking difference is in F1 score. The baseline model achieves nearly 
 <img width="662" height="211" alt="Comparisons" src="https://github.com/user-attachments/assets/0d017fce-3524-42b7-9e43-73e7c9916cd7" />
 
 
-These results together confirm that the baseline model is heavily biased toward predicting "no Cardiomegaly" — it looks accurate because most patients don't have it. The weighted loss model makes a real tradeoff: it sacrifices some precision on negatives to gain meaningful recall on positives.
+These results together confirm that the baseline model is heavily biased toward predicting "no Cardiomegaly", it looks accurate because most patients don't have it. The weighted loss model makes a real tradeoff: it sacrifices some precision on negatives to gain meaningful recall on positives.
 
 ### Fairness Analysis
 
